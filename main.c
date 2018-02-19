@@ -44,7 +44,7 @@ static int setperiodic(double sec)
         value.it_interval.tv_sec++;
         value.it_interval.tv_nsec -= BILLION;
     }
-    value.int_value = value.it_interval;
+    value.it_value = value.it_interval;
     return timer_settime(timerid, 0, &value, NULL);
 }
 
