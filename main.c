@@ -48,19 +48,55 @@ static int setperiodic(double sec)
     return timer_settime(timerid, 0, &value, NULL);
 }
 
+int makeProducer(void)
+{
+    char *argarray[]={"./producer", NULL};
+    int pid = fork();
+    if (pid == 0)
+    {
+        execvp(argarray[0], argarray);
+    }
+    return(pid);
+}
+
+int makeConsumer(void)
+{
+    char *argarray[]={"./consumer", NULL};
+    int pid = fork();
+    if (pid == 0)
+    {
+        execvp(argarray[0], argarray);
+    }
+    return(pid);
+}
+
 int main(void) {
-    if (setinterrupt() == -1)
+//    if (setinterrupt() == -1)
+//    {
+//        perror("Failed to setup SIGALRM handler");
+//        return 1;
+//    }
+//    if (setperiodic(2.0) == -1)
+//    {
+//        perror("Failed to setup periodic interrupt");
+//        return 1;
+//    }
+//    for ( ; ; )
+//    {
+//        pause();
+//    }
+    int status = 0;
+    int pid;
+    printf("Creating producer\n");
+    pid = makeProducer();
+    printf("Producer created, pid: %d", pid);
+
+    for(int i = 0; i < 3; i++)
     {
-        perror("Failed to setup SIGALRM handler");
-        return 1;
+        printf("Creating consumer\n");
+        pid = makeConsumer();
+        printf("Consumer created:, pid: %d", pid);
     }
-    if (setperiodic(2.0) == -1)
-    {
-        perror("Failed to setup periodic interrupt");
-        return 1;
-    }
-    for ( ; ; )
-    {
-        pause();
-    }
+    while ((wpid = wait(&status)) > 0);
+    printf("All children finished\n");
 }
