@@ -89,9 +89,9 @@ int main(void) {
 //    {
 //        pause();
 //    }
-//    int status = 0;
-//    int i = 0;
-//    pid_t pid, wpid;
+    int status = 0;
+    int i = 0;
+    pid_t pid, wpid;
 //    printf("Creating producer\n");
 //    pid = makeProducer();
 //    printf("Producer created, pid: %d\n", pid);
