@@ -4,8 +4,11 @@
 #include <time.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include "flags.h"
 #define BILLION 1000000000L
 #define TIMER_MSG "Received Timer interrupt \n"
+#define SHMKEY 92195
+#define BUFSZ 20
 
 static void interrupt(int signo, siginfo_t *info, void *context)
 {
@@ -86,20 +89,72 @@ int main(void) {
 //    {
 //        pause();
 //    }
-    int status = 0;
-    int i = 0;
-    pid_t pid, wpid;
-    printf("Creating producer\n");
-    pid = makeProducer();
-    printf("Producer created, pid: %d\n", pid);
+//    int status = 0;
+//    int i = 0;
+//    pid_t pid, wpid;
+//    printf("Creating producer\n");
+//    pid = makeProducer();
+//    printf("Producer created, pid: %d\n", pid);
+//
+//    for(i = 0; i < 3; i++)
+//    {
+//        printf("Creating consumer\n");
+//        pid = makeConsumer();
+//        printf("Consumer created:, pid: %d\n", pid);
+//    }
+//    while ((wpid = wait(&status)) > 0);
+//    printf("All children finished\n");
 
-    for(i = 0; i < 3; i++)
+    // create shared memory flag
+    int flagid, turnid;
+    struct flags *flag;
+    int * turn;
+
+    flagid = shmget(SHMKEY, sizeof(struct flags), 0777 | IPC_CREAT);
+    if(flagid == -1)
     {
-        printf("Creating consumer\n");
-        pid = makeConsumer();
-        printf("Consumer created:, pid: %d\n", pid);
+        perror("flag shmget");
+        exit(1);
     }
+
+    flag = (struct flags *)(shmat(flagid, 0, 0));
+    if((int) flag == -1)
+    {
+        perror("flag shmat");
+        exit(1);
+    }
+    flag->status = IDLE;
+
+    turnid = shmget(SHMKEY, sizeof(int), 0777 | IPC_CREAT);
+    if(turnid == -1)
+    {
+        perror("turn shmget");
+        exit(1);
+    }
+
+    turn = (int *)(shmat(turnid, 0, 0));
+    if((int) turn == -1)
+    {
+        perror("turn shmat");
+        exit(1);
+    }
+
+    *turn = 1;
+
+    makeProducer();
+    *turn++;
+
+    makeConsumer();
+    *turn++;
+
     while ((wpid = wait(&status)) > 0);
-    printf("All children finished\n");
+    printf("All children terminated.\n");
+    printf("Number of processes is: %d\n", *turn);
+    shmdt((void *) flag);
+    shmctl(flagid, IPC_RMID, NULL);
+    shmdt((void *) turn);
+    shmctl(turnid, IPC_RMID, NULL);
+    printf("All shared memory detached and freed\n");
+
     return(0);
 }

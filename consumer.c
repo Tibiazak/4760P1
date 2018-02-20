@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
-
+#include "flags.h"
 
 int main(void)
 {
