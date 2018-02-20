@@ -5,6 +5,9 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include "flags.h"
+#include <stdlib.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
 #define BILLION 1000000000L
 #define TIMER_MSG "Received Timer interrupt \n"
 #define SHMKEY 92195
