@@ -3,6 +3,7 @@
 #include <signal.h>
 #include <time.h>
 #include <unistd.h>
+#include <sys/wait.h>
 #define BILLION 1000000000L
 #define TIMER_MSG "Received Timer interrupt \n"
 
