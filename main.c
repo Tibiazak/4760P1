@@ -86,12 +86,13 @@ int main(void) {
 //        pause();
 //    }
     int status = 0;
-    int pid;
+    int i = 0;
+    pid_t pid, wpid;
     printf("Creating producer\n");
     pid = makeProducer();
     printf("Producer created, pid: %d", pid);
 
-    for(int i = 0; i < 3; i++)
+    for(i = 0; i < 3; i++)
     {
         printf("Creating consumer\n");
         pid = makeConsumer();
@@ -99,4 +100,5 @@ int main(void) {
     }
     while ((wpid = wait(&status)) > 0);
     printf("All children finished\n");
+    return(0);
 }
