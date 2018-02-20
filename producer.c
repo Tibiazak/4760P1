@@ -11,7 +11,7 @@
 
 int main(int argc, char * argv[])
 {
-    int shmkey, flagid, turnid;
+    int flagkey, turnkey, flagid, turnid;
     int * turn;
     struct flags * flag;
     printf("Hello, I'm producer process %d and my parent is process %d\n", getpid(), getppid());
