@@ -145,10 +145,10 @@ int main(void) {
     *turn = 1;
 
     makeProducer();
-    *turn++;
+    *turn += 1;
 
     makeConsumer();
-    *turn++;
+    *turn += 1;
 
     while ((wpid = wait(&status)) > 0);
     printf("All children terminated.\n");
