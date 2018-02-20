@@ -10,7 +10,8 @@
 #include <sys/shm.h>
 #define BILLION 1000000000L
 #define TIMER_MSG "Received Timer interrupt \n"
-#define SHMKEY 92195
+#define FLAGKEY 92195
+#define TURNKEY 92295
 #define BUFSZ 20
 
 static void interrupt(int signo, siginfo_t *info, void *context)
@@ -57,7 +58,7 @@ static int setperiodic(double sec)
 
 int makeProducer(void)
 {
-    char *argarray[]={"./producer", NULL};
+    char *argarray[]={"./producer", FLAGKEY, TURNKEY, NULL};
     int pid = fork();
     if (pid == 0)
     {
@@ -68,7 +69,7 @@ int makeProducer(void)
 
 int makeConsumer(void)
 {
-    char *argarray[]={"./consumer", NULL};
+    char *argarray[]={"./consumer", FLAGKEY, TURNKEY, NULL};
     int pid = fork();
     if (pid == 0)
     {
@@ -113,7 +114,7 @@ int main(void) {
     struct flags *flag;
     int * turn;
 
-    flagid = shmget(SHMKEY, sizeof(struct flags), 0777 | IPC_CREAT);
+    flagid = shmget(FLAGKEY, sizeof(struct flags), 0777 | IPC_CREAT);
     if(flagid == -1)
     {
         perror("flag shmget");
@@ -128,7 +129,7 @@ int main(void) {
     }
     flag->status = IDLE;
 
-    turnid = shmget(SHMKEY, sizeof(int), 0777 | IPC_CREAT);
+    turnid = shmget(TURNKEY, sizeof(int), 0777 | IPC_CREAT);
     if(turnid == -1)
     {
         perror("turn shmget");
