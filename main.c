@@ -91,13 +91,13 @@ int main(void) {
     pid_t pid, wpid;
     printf("Creating producer\n");
     pid = makeProducer();
-    printf("Producer created, pid: %d", pid);
+    printf("Producer created, pid: %d\n", pid);
 
     for(i = 0; i < 3; i++)
     {
         printf("Creating consumer\n");
         pid = makeConsumer();
-        printf("Consumer created:, pid: %d", pid);
+        printf("Consumer created:, pid: %d\n", pid);
     }
     while ((wpid = wait(&status)) > 0);
     printf("All children finished\n");
