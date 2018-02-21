@@ -92,6 +92,7 @@ int freeshm(int id1, int id2, struct flags *ptr1, int *ptr2){
     shmctl(id1, IPC_RMID, NULL);
     shmdt((void *) ptr2);
     shmctl(id2, IPC_RMID, NULL);
+    return(0);
 }
 
 int main(void) {
