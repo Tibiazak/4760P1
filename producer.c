@@ -16,8 +16,8 @@ int main(int argc, char * argv[])
     struct flags * flag;
     printf("Hello, I'm producer process %d and my parent is process %d\n", getpid(), getppid());
 
-    flagkey = argv[1];
-    turnkey = argv[2];
+    flagkey = atoi(argv[1]);
+    turnkey = atoi(argv[2]);
     flagid = shmget(flagkey, sizeof(struct flags), 0777);
     turnid = shmget(turnkey, sizeof(int), 0777);
 
