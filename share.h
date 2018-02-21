@@ -14,12 +14,12 @@ struct share {
     char buf2[20];
     char buf3[20];
     char buf4[20];
-    state bufFlag[5];
-    state flag0[17];
-    state flag1[17];
-    state flag2[17];
-    state flag3[17];
-    state flag4[17];
+    enum state bufFlag[5];
+    enum state flag0[17];
+    enum state flag1[17];
+    enum state flag2[17];
+    enum state flag3[17];
+    enum state flag4[17];
 };
 
 #endif //SHARE_H
