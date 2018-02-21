@@ -10,11 +10,8 @@
 #include <sys/shm.h>
 #define BILLION 1000000000L
 #define TIMER_MSG "Received Timer interrupt \n"
-#define FLAGKEY 92195
-#define FLAGKEYSTR "92195"
-#define TURNKEY 92295
-#define TURNKEYSTR "92295"
-#define BUFSZ 20
+#define SHAREKEY 92195
+#define SHAREKEYSTR "92195"
 #define MAX_PROCS 17
 #define DEFAULT_PROCS 10
 
@@ -67,7 +64,7 @@ static int setperiodic(double sec)
 // Fork and exec a producer with required keys/variables
 int makeProducer(void)
 {
-    char *argarray[]={"./producer", FLAGKEYSTR, TURNKEYSTR, NULL};
+    char *argarray[]={"./producer", SHAREKEYSTR, NULL};
     int pid = fork();
     if (pid == 0)
     {
@@ -79,7 +76,7 @@ int makeProducer(void)
 // Fork and exec a consumer with required keys/variables
 int makeConsumer(void)
 {
-    char *argarray[]={"./consumer", FLAGKEYSTR, TURNKEYSTR, NULL};
+    char *argarray[]={"./consumer", SHAREKEYSTR, NULL};
     int pid = fork();
     if (pid == 0)
     {
@@ -89,11 +86,9 @@ int makeConsumer(void)
 }
 
 // Detach and deallocate all shared memory
-int freeshm(int id1, int id2, struct flags *ptr1, int *ptr2){
-    shmdt((void *) ptr1);
-    shmctl(id1, IPC_RMID, NULL);
-    shmdt((void *) ptr2);
-    shmctl(id2, IPC_RMID, NULL);
+int freeshm(int shareid, struct share *shares){
+    shmdt((void *) shares);
+    shmctl(shareid, IPC_RMID, NULL);
     return(0);
 }
 
@@ -115,58 +110,42 @@ int main(void) {
 
 
     // create shared memory flag
-    int flagid, turnid;
-    struct flags *flag;
-    int * turn;
+    int shareid;
+    struct share *shares;
     int status = 0;
     int i = 0;
     pid_t pid, wpid;
 
-    // allocate shared memory for the flag
-    flagid = shmget(FLAGKEY, sizeof(struct flags), 0777 | IPC_CREAT);
+    shareid = shmget(FLAGKEY, sizeof(struct share), 0777 | IPC_CREAT);
     if(flagid == -1)
     {
-        perror("flag shmget");
-        exit(1);
-    }
-    // attach shared memory to the flag variable
-    flag = (struct flags *)(shmat(flagid, 0, 0));
-    if((int) flag == -1)
-    {
-        perror("flag shmat");
-        exit(1);
-    }
-    flag->status = IDLE;
-
-    // allocate shared memory for the turn
-    turnid = shmget(TURNKEY, sizeof(int), 0777 | IPC_CREAT);
-    if(turnid == -1)
-    {
-        perror("turn shmget");
+        perror("Master shmget");
         exit(1);
     }
 
-    // attach shared memory to the turn variable
-    turn = (int *)(shmat(turnid, 0, 0));
-    if((int) turn == -1)
+    shares = (struct share *) (shmat(shareid, 0, 0));
+    if((int) shares == -1)
     {
-        perror("turn shmat");
+        perror("Master shmat");
         exit(1);
     }
 
-    *turn = 1;
+    enum state * s = shares.bufFlag[0];
+    for(i = 0; i < 5; i++)
+    {
+        *s = empty;
+        s += 1;
+    }
 
     makeProducer();
-    *turn += 1;
 
     makeConsumer();
-    *turn += 1;
 
     while ((wpid = wait(&status)) > 0); // waits for all processes to finish
 
     printf("All children terminated.\n");
     printf("Number of processes is: %d\n", *turn);
-    freeshm(flagid, turnid, flag, turn); // free shared memory
+    freeshm(shareid, shares); // free shared memory
     printf("All shared memory detached and freed\n");
 
     return(0);

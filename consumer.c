@@ -12,22 +12,16 @@
 
 int main(int argc, char * argv[])
 {
-    int flagkey, turnkey, flagid, turnid;
-    int * turn;
-    struct flags * flag;
-    printf("Hello, I'm consumer process %d, and my parent is %d\n", getpid(), getppid());
+    iint sharekey, shareid;
+    struct share * shares;
+    printf("Hello, I'm consumer process %d and my parent is process %d\n", getpid(), getppid());
 
-    flagkey = atoi(argv[1]);
-    turnkey = atoi(argv[2]);
-    flagid = shmget(flagkey, sizeof(struct flags), 0777);
-    turnid = shmget(turnkey, sizeof(int), 0777);
+    sharekey = atoi(argv[1]);
+    shareid = shmget(sharekey, sizeof(struct share), 0777);
 
-    turn = (int *)shmat(turnid, NULL, 0);
-    flag = (struct flags *)shmat(flagid, NULL, 0);
+    shares = (struct share *)shmat(shareid, NULL, 0);
 
-    printf("Flag is currently set to: %d, turn is: %d\n", flag->status, *turn);
-    shmdt(turn);
-    shmdt(flag);
+    shmdt(shares);
     printf("Shared memory has been detached.\n");
     return 0;
 }
