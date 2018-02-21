@@ -117,7 +117,7 @@ int main(void) {
     pid_t pid, wpid;
 
     shareid = shmget(SHAREKEY, sizeof(struct share), 0777 | IPC_CREAT);
-    if(flagid == -1)
+    if(shareid == -1)
     {
         perror("Master shmget");
         exit(1);
@@ -144,7 +144,6 @@ int main(void) {
     while ((wpid = wait(&status)) > 0); // waits for all processes to finish
 
     printf("All children terminated.\n");
-    printf("Number of processes is: %d\n", *turn);
     freeshm(shareid, shares); // free shared memory
     printf("All shared memory detached and freed\n");
 
