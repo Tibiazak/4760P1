@@ -16,6 +16,7 @@
 #define TURNKEYSTR "92295"
 #define BUFSZ 20
 
+// A function from the setperiodic code, not entirely sure how it works
 static void interrupt(int signo, siginfo_t *info, void *context)
 {
     int errsave;
@@ -25,6 +26,7 @@ static void interrupt(int signo, siginfo_t *info, void *context)
     errno = errsave;
 }
 
+// A function from the setperiodic code, not entirely sure how it works
 static int setinterrupt()
 {
     struct sigaction act;
@@ -38,6 +40,8 @@ static int setinterrupt()
     return 0;
 }
 
+// Eventually: A function to send a ctrl+c signal to this process after 100 seconds
+// Currently: a function that prints to the screen every 2 seconds indefinitely
 static int setperiodic(double sec)
 {
     timer_t timerid;
@@ -58,6 +62,7 @@ static int setperiodic(double sec)
     return timer_settime(timerid, 0, &value, NULL);
 }
 
+// Fork and exec a producer with required keys/variables
 int makeProducer(void)
 {
     char *argarray[]={"./producer", FLAGKEYSTR, TURNKEYSTR, NULL};
@@ -69,6 +74,7 @@ int makeProducer(void)
     return(pid);
 }
 
+// Fork and exec a consumer with required keys/variables
 int makeConsumer(void)
 {
     char *argarray[]={"./consumer", FLAGKEYSTR, TURNKEYSTR, NULL};
@@ -78,6 +84,14 @@ int makeConsumer(void)
         execvp(argarray[0], argarray);
     }
     return(pid);
+}
+
+// Detach and deallocate all shared memory
+int freeshm(int id1, int id2, struct flags *ptr1, int *ptr2){
+    shmdt((void *) ptr1);
+    shmctl(id1, IPC_RMID, NULL);
+    shmdt((void *) ptr2);
+    shmctl(id2, IPC_RMID, NULL);
 }
 
 int main(void) {
@@ -95,34 +109,24 @@ int main(void) {
 //    {
 //        pause();
 //    }
-    int status = 0;
-    int i = 0;
-    pid_t pid, wpid;
-//    printf("Creating producer\n");
-//    pid = makeProducer();
-//    printf("Producer created, pid: %d\n", pid);
-//
-//    for(i = 0; i < 3; i++)
-//    {
-//        printf("Creating consumer\n");
-//        pid = makeConsumer();
-//        printf("Consumer created:, pid: %d\n", pid);
-//    }
-//    while ((wpid = wait(&status)) > 0);
-//    printf("All children finished\n");
+
 
     // create shared memory flag
     int flagid, turnid;
     struct flags *flag;
     int * turn;
+    int status = 0;
+    int i = 0;
+    pid_t pid, wpid;
 
+    // allocate shared memory for the flag
     flagid = shmget(FLAGKEY, sizeof(struct flags), 0777 | IPC_CREAT);
     if(flagid == -1)
     {
         perror("flag shmget");
         exit(1);
     }
-
+    // attach shared memory to the flag variable
     flag = (struct flags *)(shmat(flagid, 0, 0));
     if((int) flag == -1)
     {
@@ -131,6 +135,7 @@ int main(void) {
     }
     flag->status = IDLE;
 
+    // allocate shared memory for the turn
     turnid = shmget(TURNKEY, sizeof(int), 0777 | IPC_CREAT);
     if(turnid == -1)
     {
@@ -138,6 +143,7 @@ int main(void) {
         exit(1);
     }
 
+    // attach shared memory to the turn variable
     turn = (int *)(shmat(turnid, 0, 0));
     if((int) turn == -1)
     {
@@ -153,14 +159,11 @@ int main(void) {
     makeConsumer();
     *turn += 1;
 
-    while ((wpid = wait(&status)) > 0);
+    while ((wpid = wait(&status)) > 0); // waits for all processes to finish
 
     printf("All children terminated.\n");
     printf("Number of processes is: %d\n", *turn);
-    shmdt((void *) flag);
-    shmctl(flagid, IPC_RMID, NULL);
-    shmdt((void *) turn);
-    shmctl(turnid, IPC_RMID, NULL);
+    freeshm(flagid, turnid, flag, turn); // free shared memory
     printf("All shared memory detached and freed\n");
 
     return(0);
