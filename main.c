@@ -4,7 +4,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include "flags.h"
+#include "share.h"
 #include <stdlib.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -15,6 +15,8 @@
 #define TURNKEY 92295
 #define TURNKEYSTR "92295"
 #define BUFSZ 20
+#define MAX_PROCS 17
+#define DEFAULT_PROCS 10
 
 // A function from the setperiodic code, not entirely sure how it works
 static void interrupt(int signo, siginfo_t *info, void *context)
