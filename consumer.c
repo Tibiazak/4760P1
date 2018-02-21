@@ -12,7 +12,7 @@
 
 int main(int argc, char * argv[])
 {
-    iint sharekey, shareid;
+    int sharekey, shareid;
     struct share * shares;
     printf("Hello, I'm consumer process %d and my parent is process %d\n", getpid(), getppid());
 
