@@ -116,7 +116,7 @@ int main(void) {
     int i = 0;
     pid_t pid, wpid;
 
-    shareid = shmget(FLAGKEY, sizeof(struct share), 0777 | IPC_CREAT);
+    shareid = shmget(SHAREKEY, sizeof(struct share), 0777 | IPC_CREAT);
     if(flagid == -1)
     {
         perror("Master shmget");
@@ -130,7 +130,7 @@ int main(void) {
         exit(1);
     }
 
-    enum state * s = shares.bufFlag[0];
+    enum state * s = &(shares->bufFlag[0]);
     for(i = 0; i < 5; i++)
     {
         *s = empty;
