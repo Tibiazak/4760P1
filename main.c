@@ -15,7 +15,7 @@
 #define MAX_PROCS 17
 #define DEFAULT_PROCS 10
 
-// A function from the setperiodic code, not entirely sure how it works
+// A function from the setperiodic code, catches the interrupt and prints to screen
 static void interrupt(int signo, siginfo_t *info, void *context)
 {
     int errsave;
@@ -25,7 +25,7 @@ static void interrupt(int signo, siginfo_t *info, void *context)
     errno = errsave;
 }
 
-// A function from the setperiodic code, not entirely sure how it works
+// A function from the setperiodic code, it sets up the interrupt handler
 static int setinterrupt()
 {
     struct sigaction act;
@@ -39,8 +39,8 @@ static int setinterrupt()
     return 0;
 }
 
-// Eventually: A function to send a ctrl+c signal to this process after 100 seconds
-// Currently: a function that prints to the screen every 2 seconds indefinitely
+// A function that sets up a timer to go off after a specified number of seconds
+// The timer only goes off once
 static int setperiodic(double sec)
 {
     timer_t timerid;
@@ -50,14 +50,10 @@ static int setperiodic(double sec)
     {
         return -1;
     }
-    value.it_interval.tv_sec = (long)sec;
-    value.it_interval.tv_nsec = (sec - value.it_interval.tv_sec)*BILLION;
-    if (value.it_interval.tv_nsec >= BILLION)
-    {
-        value.it_interval.tv_sec++;
-        value.it_interval.tv_nsec -= BILLION;
-    }
-    value.it_value = value.it_interval;
+    value.it_value.tv_sec = (long)sec;
+    value.it_value.tv_nsec = 0;
+    value.it_interval.tv_sec = 0;
+    value.it_interval.tv_nsec = 0;
     return timer_settime(timerid, 0, &value, NULL);
 }
 

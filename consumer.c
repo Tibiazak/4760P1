@@ -21,6 +21,9 @@ int main(int argc, char * argv[])
 
     shares = (struct share *)shmat(shareid, NULL, 0);
 
+    while(shares->bufFlag[0] != full);
+    printf(shares->buf0);
+
     shmdt(shares);
     printf("Shared memory has been detached.\n");
     return 0;
