@@ -1,0 +1,22 @@
+Joshua Bearden
+2/21/18
+Operating Systems Project 2
+
+This program currently is not complete, so it does not fully execute the project.
+
+This program, currently, creates shared memory that has 5 buffers and a buffer flag array,
+a flag array, and a turn variable.
+
+It then creates a producer and a consumer. The producer reads the input file and attaches shared memory,
+checks to ensure that the shared memory buffer isn't full and then fills the buffer, setting the buffer
+flag to be full. It then detaches shared memory and closes the file.
+
+The consumer attaches shared memory, waits for the buffer to be full, then prints the buffer to the screen.
+
+
+Currently, make the program by typing:
+make all
+
+Then, run the program by executing:
+./master
+

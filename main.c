@@ -1,3 +1,25 @@
+/* Joshua Bearden
+ * 2/21/18
+ * Operating Systems Project 2
+ *
+ * A program to fork a producer and a number of consumer child processes,
+ * where the producer fills 5 buffers with text from an input file
+ * and the consumers empty the buffers and add to log files.
+ *
+ * This project needs to use shared memory and Peterson's Multiple Process Solution
+ * to the critical section problem.
+ *
+ * This project is incomplete - currently it creates (and empties) all of the shared
+ * memory needed (5 buffers, flag variables). The producer grabs one line from the
+ * input file, fills a buffer with it and sets the appropriate flag. The consumer
+ * grabs that file and prints it out to the screen.
+ *
+ * Much of the code for the 100 second timer is in there, however the signal handler is not
+ * working yet. Peterson's solution has also not been implemented. The actual work of
+ * filling and emptying buffers, while not complete, is trivial to implement once the signal
+ * handler and peterson's solution are implemented.
+ */
+
 #include <stdio.h>
 #include <errno.h>
 #include <signal.h>
